@@ -1039,7 +1039,7 @@ class Agent:
                  provider: str, 
                  system_prompt: str, 
                  tools: List[Tool] = all_tools, 
-                 accessible_tools: Dict[str] = {},
+                 accessible_tools: Dict[str] = {k.name: True for k in all_tools},
                  mcp_servers: List[str] = []):
         
         self.agency: 'Agency' = agency
