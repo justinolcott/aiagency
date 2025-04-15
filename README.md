@@ -1,18 +1,10 @@
-# aiagency
+# Instructions
+- Navigate to the `ai_agency` directory.
+- Add your API keys to the `.example.env` file.
 
-Repo for CS 673 Computation Creativity
+## Building the Docker Image
+`docker build -t ai-agency .`
 
 
-
-
-# Help
-- Needed this for NV-Embed-v2
-```
-pip uninstall -y transformer-engine
-pip install torch==2.2.0
-pip install transformers==4.42.4
-pip install flash-attn==2.2.0
-pip install sentence-transformers==2.7.0
-```
-
-- install requirements.txt and then run `playwright install`
+## Running the Docker Image
+`docker run --env-file .example.env -p 8000:8000 -p 3000:3000 ai-agency`
