@@ -25,8 +25,16 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# --- Initialize Agency ---
+# PROMPTS
+MAIN_AGENT_SYSTEM_PROMPT = """You are a friendly, helpful assistant. You are the main agent in a hierachical system of agents.
+You have access to a variety of tools including the ability to create new agents, message other agents, and have meetings.
+When the user gives you a task, you will first think through the task and then decide which tool to use. Use your ability to work with
+other agents to complete the task by delegating subtasks. Hold meetings to ensure all agents are on the same page and that everyone is working towards the same goal.
+"""
 
-app.state.agency = Agency(workspace_id="webapi_workspace")
+
+app.state.agency = Agency(workspace_id="webapi_workspace", main_agent_system_prompt=MAIN_AGENT_SYSTEM_PROMPT)
 
 # --- Pydantic models for requests ---
 
@@ -143,7 +151,7 @@ async def start_new_agency(req: StartAgencyRequest):
         return {"status": "started", "from_state_file": req.from_state_file}
     else:
         workspace_id = req.workspace_id or f"webapi_workspace_{os.urandom(4).hex()}"
-        app.state.agency = Agency(workspace_id=workspace_id)
+        app.state.agency = Agency(workspace_id=workspace_id, main_agent_system_prompt=MAIN_AGENT_SYSTEM_PROMPT)
         return {"status": "started", "workspace_id": workspace_id}
 
 @app.post("/agency/stop")

@@ -9,6 +9,7 @@ __pycache__/
 
 # Ignore workspaces, node_modules, conversations, and tmp directories
 workspace/
+workspaces/
 node_modules/
 tmp/
 conversations/

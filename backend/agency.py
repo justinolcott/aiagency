@@ -36,14 +36,14 @@ from pydantic_ai.mcp import MCPServerStdio
 from pydantic_ai.models.test import TestModel
 from pydantic_ai.tools import Tool, ToolDefinition
 
+
+
+
 # MODELS
 @dataclass
 class AgentDependencies:
     agency: 'Agency'
     agent_id: str
-    
-    
-    
     
     
 
@@ -1205,7 +1205,9 @@ class AgencyState(BaseModel):
     workspace_id: Optional[str] = None
     
 class Agency:
-    def __init__(self, state: Optional[AgencyState] = None, tools: List[Tool] = all_tools, workspace_id: Optional[str] = None):
+    def __init__(self, state: Optional[AgencyState] = None, tools: List[Tool] = all_tools, workspace_id: Optional[str] = None,
+                 main_agent_system_prompt: str = "You are a helpful assistant."
+                 ):
         self.agents: Dict[str, Agent] = {}
         self.all_tools_map = {tool.name: tool for tool in tools}
         self.server_manager = MCPServerManager()
@@ -1261,7 +1263,8 @@ class Agency:
 
         else:
             # Initialize fresh agency with default configuration
-            self.default_provider = "anthropic:claude-3-5-haiku-latest"
+            # self.default_provider = "anthropic:claude-3-5-haiku-latest"
+            self.default_provider = "google-gla:gemini-2.0-flash-lite-preview-02-05"
             
             # Initialize MCP servers
             self._setup_mcp_servers()
@@ -1271,7 +1274,7 @@ class Agency:
                 "main_agent",
                 "0",
                 self.default_provider,
-                "You are a helpful, friendly assistant with web browsing capabilities.",
+                main_agent_system_prompt,
                 tools=list(self.all_tools_map.values()),
                 accessible_tools={
                     "create_new_agent": True,
