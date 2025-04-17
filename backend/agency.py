@@ -1251,6 +1251,7 @@ class Agency:
             # self.default_provider = "google-gla:gemini-2.0-flash-lite-preview-02-05"
             # self.default_provider = "anthropic:claude-3-7-sonnet-latest"
             self.default_provider = "openai:gpt-4.1-nano"
+            self.default_provider = os.environ.get("DEFAULT_PROVIDER", self.default_provider)
             
             # Initialize MCP servers
             self._setup_mcp_servers()
