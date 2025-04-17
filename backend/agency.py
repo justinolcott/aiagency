@@ -237,7 +237,8 @@ def create_new_agent_helper(agency: 'Agency', name: str, system_prompt: str, par
         new_agent_id,
         agency.default_provider,
         system_prompt,
-        mcp_servers=agency.default_mcp_servers  # <-- this line ensures new agents get the default servers
+        accessible_tools=[], # No tools by default
+        mcp_servers=[] # No servers by default
     )
     
     agency.agents[new_agent_id] = new_agent
@@ -329,14 +330,11 @@ async def prepare_message_agent_tool(
         print("No children agents to message.")
         return None
     
-    # override to show which children can be messaged
-    # TODO
-    
     return tool_def
 
 send_message_tool = Tool(message_agent, prepare=prepare_message_agent_tool)
 
-async def call_meeting(ctx: RunContext[AgentDependencies], meeting_objective: str, max_turns: int = 5) -> str:
+async def call_meeting(ctx: RunContext[AgentDependencies], meeting_objective: str, max_turns: int = 15) -> str:
     print("Calling meeting...")
     agency = ctx.deps.agency
     host_id = ctx.deps.agent_id
@@ -355,7 +353,7 @@ async def call_meeting(ctx: RunContext[AgentDependencies], meeting_objective: st
         id=temp_host_id,
         provider=host.provider,
         system_prompt=host.system_prompt,
-        tools=host.tools,
+        tools=host.tools, 
         accessible_tools={}
     )
     temp_host.message_history = host.message_history.copy()
@@ -435,7 +433,8 @@ f"""Meeting Instructions:
     
     agents_done = set()
     turn = 0
-    max_rounds = max_turns * len(participants) # Ensure each agent gets at least one turn
+    max_rounds = max_turns * len(participants)
+    max_rounds = min(max_rounds, 15)
     
     # print participants
     print("Participants:")
@@ -453,8 +452,8 @@ f"""Meeting Instructions:
             break
             
         for agent in participants:
-            if agent.id in agents_done:
-                continue
+            # if agent.id in agents_done:
+            #     continue
                 
             turn += 1
             print(f"Turn {turn}: {agent.name} ({agent.id})")
@@ -466,21 +465,6 @@ f"""Meeting Instructions:
                 response = result.data.strip() if result and hasattr(result, 'data') else "No response"
                 
                 print(f"Response: {response}")
-                
-                # THIS IS DONE AUTOMATICALLY BY THE AGENT
-                # Add message to the agent's message history
-                # agent.message_history.extend([
-                #     ModelRequest(
-                #         parts=[
-                #             UserPromptPart(content=YOUR_TURN_PHRASE)
-                #         ]
-                #     ),
-                #     ModelResponse(
-                #         parts=[
-                #             TextPart(content=response)
-                #         ]
-                #     )
-                # ])
                 
                 # Add the message to the other agents' message history
                 for other_agent in participants:
@@ -1004,15 +988,15 @@ all_tools = [
     send_message_tool,
     call_meeting_tool,
     internal_monologue_tool,
-    get_file_tool,
-    make_file_tool,
-    edit_file_tool,
-    delete_file_tool,
-    list_files_tool,
-    new_terminal_tool,
-    run_command_tool,
-    delete_terminal_tool,
-    list_terminals_tool,
+    # get_file_tool,
+    # make_file_tool,
+    # edit_file_tool,
+    # delete_file_tool,
+    # list_files_tool,
+    # new_terminal_tool,
+    # run_command_tool,
+    # delete_terminal_tool,
+    # list_terminals_tool,
 ]
 
 
@@ -1063,7 +1047,7 @@ class Agent:
             provider,
             system_prompt=system_prompt,
             tools=tools,
-            mcp_servers=mcp_servers_list if mcp_servers_list else None
+            mcp_servers=mcp_servers_list  # always a list, even if empty
         )
         
         self.parent_id = None
@@ -1264,7 +1248,9 @@ class Agency:
         else:
             # Initialize fresh agency with default configuration
             # self.default_provider = "anthropic:claude-3-5-haiku-latest"
-            self.default_provider = "google-gla:gemini-2.0-flash-lite-preview-02-05"
+            # self.default_provider = "google-gla:gemini-2.0-flash-lite-preview-02-05"
+            # self.default_provider = "anthropic:claude-3-7-sonnet-latest"
+            self.default_provider = "openai:gpt-4.1-nano"
             
             # Initialize MCP servers
             self._setup_mcp_servers()
@@ -1281,17 +1267,18 @@ class Agency:
                     "message_agent": True,
                     "call_meeting": True,
                     "internal_monologue": True,
-                    "get_file_content": True,
-                    "make_file": True,
-                    "edit_file": True,
-                    "delete_file": True,
-                    "list_files": True,
-                    "new_terminal": True,
-                    "run_command": True,
-                    "delete_terminal": True,
-                    "list_terminals": True,
+                    # "get_file_content": True,
+                    # "make_file": True,
+                    # "edit_file": True,
+                    # "delete_file": True,
+                    # "list_files": True,
+                    # "new_terminal": True,
+                    # "run_command": True,
+                    # "delete_terminal": True,
+                    # "list_terminals": True,
                 },
-                mcp_servers=["mcp_server_playwright", "mcp_server_python"]
+                # mcp_servers=["mcp_server_playwright", "mcp_server_python"]
+                mcp_servers=[]
             )
             self.agents["0"] = self.main_agent
             self.agents["0"].parent_id = None
@@ -1415,21 +1402,9 @@ async def main():
         # Example usage that demonstrates the new capabilities
         # Create a file and run some bash commands
         response = await agency.run("""
-        Go to duckduckgo.com
+        Generate a thorough report on tariffs with multiple perspectives. Create a few agents representing different perspectives and experts. Have a meeting/council and generate me a report after. Have the meeting have at least 15 turns, but no more than 35. Everyone should speak at least 3 turns. Please instruct everyone to be concise and a maximum of 100 words.
         """)
         
-        print("Response:")
-        print(response.data)
-        
-        
-        response = await agency.run("""
-        Now search for weather in provo, utah
-        """)
-        print("Response:")
-        
-        response = await agency.run("""
-        Did it save your browser state in between my two previous messages?
-        """)
         print("Response:")
         print(response.data)
         
