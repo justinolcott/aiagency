@@ -13,8 +13,8 @@ import io       # For handling byte streams
 import cairosvg # For converting SVG to PNG (requires installation: pip install cairosvg)
 
 # --- Configuration ---
-file_path = '/Users/justinolcott/Documents/Code/potterywheel/aiagency/conversations/tariff_meeting_5.json' # Assumes the JSON data is saved here
-output_filename = 'figures/conversation_animation_robot_nodes.gif'
+file_path = '/Users/justinolcott/Documents/Code/potterywheel/aiagency/conversations/todo_list_website.json' # Assumes the JSON data is saved here
+output_filename = 'figures/todo.gif'
 local_png_filename = 'robot.png' # Temporary file for rasterized image
 
 # Text and Node Sizes/Appearance
