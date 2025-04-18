@@ -43,7 +43,9 @@ export default function AgentStatePage(props: { params: Promise<{ state_file: st
                             <div key={j} className="mb-2">
                                 {/* Message text content */}
                                 {part.content && !part.tool_name && (
-                                    <div className="pl-2 text-black whitespace-pre-wrap">{part.content}</div>
+                                    <div className="pl-2 text-black whitespace-pre-wrap">
+                                        {typeof part.content === 'object' ? JSON.stringify(part.content, null, 2) : part.content}
+                                    </div>
                                 )}
 
                                 {/* Tool calls - only show if showDetails is true */}
@@ -66,7 +68,7 @@ export default function AgentStatePage(props: { params: Promise<{ state_file: st
                                     <div className="pl-2 mt-1 mb-1">
                                         <div className="text-green-600 font-medium">Tool Return: {part.tool_name}</div>
                                         <div className="bg-gray-200 p-2 rounded text-sm whitespace-pre-wrap overflow-x-auto text-black">
-                                            {part.content}
+                                            {typeof part.content === 'object' ? JSON.stringify(part.content, null, 2) : part.content}
                                         </div>
                                         <div className="text-xs text-gray-500">ID: {part.tool_call_id}</div>
                                     </div>
