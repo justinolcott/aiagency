@@ -237,8 +237,9 @@ def create_new_agent_helper(agency: 'Agency', name: str, system_prompt: str, par
         new_agent_id,
         agency.default_provider,
         system_prompt,
-        accessible_tools=[], # No tools by default
-        mcp_servers=[] # No servers by default
+        accessible_tools={}, # No tools by default
+        # mcp_servers=[] # No servers by default
+        mcp_servers=agency.default_mcp_servers,  # Use default MCP servers
     )
     
     agency.agents[new_agent_id] = new_agent
@@ -988,11 +989,11 @@ all_tools = [
     send_message_tool,
     call_meeting_tool,
     internal_monologue_tool,
-    # get_file_tool,
-    # make_file_tool,
-    # edit_file_tool,
-    # delete_file_tool,
-    # list_files_tool,
+    get_file_tool,
+    make_file_tool,
+    edit_file_tool,
+    delete_file_tool,
+    list_files_tool,
     # new_terminal_tool,
     # run_command_tool,
     # delete_terminal_tool,
@@ -1268,24 +1269,24 @@ class Agency:
                     "message_agent": True,
                     "call_meeting": True,
                     "internal_monologue": True,
-                    # "get_file_content": True,
-                    # "make_file": True,
-                    # "edit_file": True,
-                    # "delete_file": True,
-                    # "list_files": True,
+                    "get_file_content": True,
+                    "make_file": True,
+                    "edit_file": True,
+                    "delete_file": True,
+                    "list_files": True,
                     # "new_terminal": True,
                     # "run_command": True,
                     # "delete_terminal": True,
                     # "list_terminals": True,
                 },
-                # mcp_servers=["mcp_server_playwright", "mcp_server_python"]
-                mcp_servers=[]
+                mcp_servers=["mcp_server_playwright", "mcp_server_python"],
+                # mcp_servers=[]
             )
             self.agents["0"] = self.main_agent
             self.agents["0"].parent_id = None
             self.current_id = 1
             self.max_depth = 3
-            self.max_breadth = 3
+            self.max_breadth = 7
             self.max_agents = 10
     
     def _setup_mcp_servers(self):
@@ -1402,9 +1403,14 @@ async def main():
     try:
         # Example usage that demonstrates the new capabilities
         # Create a file and run some bash commands
-        response = await agency.run("""
-        Generate a thorough report on tariffs with multiple perspectives. Create a few agents representing different perspectives and experts. Have a meeting/council and generate me a report after. Have the meeting have at least 15 turns, but no more than 35. Everyone should speak at least 3 turns. Please instruct everyone to be concise and a maximum of 100 words.
-        """)
+        # response = await agency.run("""
+        # Generate a thorough report on tariffs with multiple perspectives. Create a few agents representing different perspectives and experts. Have a meeting/council and generate me a report after. Have the meeting have at least 15 turns, but no more than 35. Everyone should speak at least 3 turns. Please instruct everyone to be concise and a maximum of 100 words.
+        # """)
+        # response = await agency.run("""Create a poem about minecraft. Create a few agents to help. Have a meeting/council and refine the poem. Output the final poem to me.""")
+        
+        response = await agency.run("""I'm going on a cruise from Vancouver to Anchorage. Please generate a travel guide for me saved as travel_guide.md.  Start by getting a list of destinations and then create an agent to research each destination. Create at least 5 agents. Message each of them telling them to gather information using their browser tools. Do not use the call meeting function. Afterwards, compile the information and provide a summary of each destination along with travel tips.""") 
+        # response = await agency.run("""make a helloworld.md file""")
+        # response = await agency.run("""which tools do you have access to? Give me the whole list""")
         
         print("Response:")
         print(response.data)
